@@ -10,7 +10,12 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using API.Hooks;
+using Carbon;
+using Carbon.Components;
 using UnityEngine;
+using Harmony = HarmonyLib.Harmony;
+using Logger = Carbon.Logger;
 
 namespace RustServerMetrics
 {
@@ -80,23 +85,20 @@ namespace RustServerMetrics
         internal void OnServerStarted()
         {
             RustServerMetricsLoader.__serverStarted = true;
-            
+
             Debug.Log($"[ServerMetrics]: Applying Startup Patches");
             var assembly = GetType().Assembly;
 
-            var harmonyInstance = HarmonyLoader.loadedMods.FirstOrDefault(x => x.Assembly == assembly)?.Harmony.harmonyObject;
-            if (harmonyInstance == null)
-            {
-                RustServerMetricsLoader.__harmonyInstance ??= new Harmony("RustServerMetrics" + "PATCH");
-                harmonyInstance = RustServerMetricsLoader.__harmonyInstance;
-            }
+            RustServerMetricsLoader.__harmonyInstance ??= new Harmony("RustServerMetrics" + "PATCH");
+
+            HandleCarbon(RustServerMetricsLoader.__harmonyInstance);
 
             var nestedTypes = assembly.GetTypes();
             foreach (var nestedType in nestedTypes)
             {
                 if (nestedType.GetCustomAttribute<DelayedHarmonyPatchAttribute>(false) == null) continue;
-                
-                var patchProcessor = new PatchClassProcessor((Harmony)harmonyInstance, nestedType);
+
+                var patchProcessor = new PatchClassProcessor(RustServerMetricsLoader.__harmonyInstance, nestedType);
                 Debug.Log(patchProcessor.Patch() == null ? $"[ServerMetrics]: Failed to apply patch: {nestedType.Name}" : $"[ServerMetrics]: Applied Startup Patch: {nestedType.Name}");
             }
         }
@@ -135,6 +137,41 @@ namespace RustServerMetrics
 
         #endregion
 
+        internal void HandleCarbon(Harmony instance)
+        {
+	        var assembly = typeof(MetricsLogger).Assembly;
+	        var types = assembly.GetTypes();
+	        var count = 0;
+	        using var args = TempArray<object>.New([instance]);
+
+	        foreach (var type in types.Where(x => x.GetCustomAttribute<DelayedHarmonyPatchAttribute>() != null))
+	        {
+		        foreach (var method in type.GetMethods(BindingFlags.Static | BindingFlags.Public).Where(x => x.GetCustomAttribute<HarmonyTargetMethods>() != null))
+		        {
+			        IEnumerable<MethodBase> results = method.Invoke(null, args.Array) as IEnumerable<MethodBase>;
+
+			        Logger.Log($"Lookup {type.Name}.{method.Name}: {results == null} {results?.Count()}");
+
+			        foreach (var patchedMethod in results)
+			        {
+				        var hook = Community.Runtime.HookManager.LoadedDynamicHooks.FirstOrDefault(x =>
+					        (x.TargetMethods != null && x.TargetMethods.Count != 0 && x.TargetMethods[0] == patchedMethod));
+
+				        if (hook == null)
+				        {
+					        Logger.Log($" Not found: {patchedMethod.Name}");
+					        continue;
+				        }
+
+				        Community.Runtime.HookManager.Subscribe(hook.Identifier, "RSM.Static");
+				        count++;
+			        }
+		        }
+	        }
+
+	        Logger.Warn($"[RSM] Force patching {count:n0} static hooks");
+	        Community.Runtime.HookManager.ForceUpdateHooks();
+        }
 
         internal void OnPlayerInit(BasePlayer player)
         {

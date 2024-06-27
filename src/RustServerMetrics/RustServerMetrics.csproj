@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<RootNamespace>RustServerMetrics</RootNamespace>
-		<AssemblyName>RustServerMetrics</AssemblyName>
+		<AssemblyName>Carbon.RSM</AssemblyName>
 		<ProjectGuid>{3C3A47A5-709A-42BB-B2BF-DB1FA0FEE316}</ProjectGuid>
 
 		<TargetFramework>net48</TargetFramework>
@@ -15,9 +15,9 @@
 		<GamePlatform Condition=" '$(Configuration)' == 'Windows' ">windows</GamePlatform>
 		<GamePlatform Condition=" '$(GamePlatform)' == '' ">linux</GamePlatform>
 
-		<AssemblySearchPaths>..\..\deps\$(GamePlatform);$(AssemblySearchPaths)</AssemblySearchPaths>
+		<AssemblySearchPaths>..\..\deps\$(GamePlatform);$(AssemblySearchPaths);..\..\carbon</AssemblySearchPaths>
 
-		<LangVersion>10</LangVersion>
+		<LangVersion>preview</LangVersion>
 
 		<Nullable>disable</Nullable>
 	</PropertyGroup>
@@ -50,6 +50,8 @@
 	</Target>
 
 	<ItemGroup>
+		<Reference Include="Carbon.Common" />
+		<Reference Include="Carbon.SDK" />
 		<Reference Include="0Harmony" />
 		<Reference Include="Accessibility" />
 		<Reference Include="Assembly-CSharp" />
@@ -73,7 +75,6 @@
 		<Reference Include="Rust.Data" />
 		<Reference Include="Rust.Demo" />
 		<Reference Include="Rust.Global" />
-		<Reference Include="Rust.Harmony" />
 		<Reference Include="Rust.Localization" />
 		<Reference Include="Rust.Platform" />
 		<Reference Include="Rust.Platform.Common" />
