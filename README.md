@@ -13,7 +13,7 @@ A metrics gathering HarmonyMod for [Rust](https://playrust.com) game servers.
 5. Create a user with `write` permissions on the newly create database
 6. Import the [Dashboard](https://raw.githubusercontent.com/CarbonCommunity/Carbon.RSM/master/res/Grafana-Dashboard.json) into Grafana and Configure the DataSource variable
 7. Stop your Rust server, **see warning below**
-8. Download the latest version of [Carbon.[Linux|Windows].RSM.dll](https://github.com/CarbonCommunity/Carbon.RSM/releases/tag/main) from this projects [latest release](https://github.com/CarbonCommunity/Carbon.RSM/releases/tag/main) and copy it to the `carbon/managed/modules` folder in your Carbon server directory
+8. Download the latest version of Carbon.[Windows|Linux].RSM.dll from this projects [latest release](https://github.com/CarbonCommunity/Carbon.RSM/releases/tag/main) and copy it to the `carbon/managed/modules` folder in your Carbon server directory
 9. Start your Rust Server, **see warning below**
 10. Once the server has started and the mod has loaded, setup your configuration file located `HarmonyMods_Data/ServerMetrics/Configuration.json`
 11. Reload the configuration file by issuing the command `servermetrics.reloadcfg`
