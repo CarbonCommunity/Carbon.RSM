@@ -82,16 +82,34 @@ namespace RustServerMetrics.HarmonyPatches
 	        }
 
 	        nextTick = time + 1f;
-	        var temp = PoolEx.GetDictionary<string, double>();
 
-	        foreach (var plugin in Community.Runtime.Plugins.Plugins)
+	        // Handle Plugins
 	        {
-		        temp.Add(plugin.Name, plugin.TotalHookTime.TotalMilliseconds);
+		        var temp = PoolEx.GetDictionary<string, double>();
+
+		        foreach (var plugin in Community.Runtime.Plugins.Plugins)
+		        {
+			        temp.Add(plugin.Name, plugin.TotalHookTime.TotalMilliseconds);
+		        }
+
+		        MetricsLogger.Instance.OnOxidePluginMetrics(temp);
+
+		        PoolEx.FreeDictionary(ref temp);
 	        }
 
-	        MetricsLogger.Instance.OnOxidePluginMetrics(temp);
+	        // Handle Modules
+	        {
+		        var temp = PoolEx.GetDictionary<string, double>();
 
-	        PoolEx.FreeDictionary(ref temp);
+		        foreach (var module in Community.Runtime.ModuleProcessor.Modules)
+		        {
+			        temp.Add(module.Name, module.TotalHookTime.TotalMilliseconds);
+		        }
+
+		        MetricsLogger.Instance.OnCarbonModuleMetrics(temp);
+
+		        PoolEx.FreeDictionary(ref temp);
+	        }
         }
     }
 }

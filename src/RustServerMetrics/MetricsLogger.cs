@@ -223,19 +223,36 @@ namespace RustServerMetrics
 
         internal void OnOxidePluginMetrics(Dictionary<string, double> metrics)
         {
-            if (!Ready) return;
-            if (metrics.Count < 1) return;
+	        if (!Ready) return;
+	        if (metrics.Count < 1) return;
 
-            foreach (var metric in metrics)
-            {
-                UploadPacket("oxide_plugins", metric, (builder, report) =>
-                {
-                    builder.Append(",plugin=\"");
-                    builder.Append(PLUGIN_NAME_REGEX.Replace(report.Key, string.Empty));
-                    builder.Append("\" hookTime=");
-                    builder.Append(report.Value);
-                });
-            }
+	        foreach (var metric in metrics)
+	        {
+		        UploadPacket("oxide_plugins", metric, (builder, report) =>
+		        {
+			        builder.Append(",plugin=\"");
+			        builder.Append(PLUGIN_NAME_REGEX.Replace(report.Key, string.Empty));
+			        builder.Append("\" hookTime=");
+			        builder.Append(report.Value);
+		        });
+	        }
+        }
+
+        internal void OnCarbonModuleMetrics(Dictionary<string, double> metrics)
+        {
+	        if (!Ready) return;
+	        if (metrics.Count < 1) return;
+
+	        foreach (var metric in metrics)
+	        {
+		        UploadPacket("carbon_modules", metric, (builder, report) =>
+		        {
+			        builder.Append(",module=\"");
+			        builder.Append(PLUGIN_NAME_REGEX.Replace(report.Key, string.Empty));
+			        builder.Append("\" hookTime=");
+			        builder.Append(report.Value);
+		        });
+	        }
         }
 
         internal bool OnClientPerformanceReport(ClientPerformanceReport clientPerformanceReport)
