@@ -34,13 +34,13 @@ namespace RustServerMetrics.HarmonyPatches
 
             retList.InsertRange(insertionIndex, new CodeInstruction[]
             {
-                new CodeInstruction(OpCodes.Ldsfld, fieldInfo)
+                new(OpCodes.Ldsfld, fieldInfo)
                 {
                     labels = labels,
                 },
-                new CodeInstruction(OpCodes.Ldloc_2),
-                new CodeInstruction(OpCodes.Call, methodInfo),
-                new CodeInstruction(OpCodes.Brtrue, jmpLabel)
+                new(OpCodes.Ldloc_2),
+                new(OpCodes.Call, methodInfo),
+                new(OpCodes.Brtrue, jmpLabel)
             });
 
             return retList;

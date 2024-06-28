@@ -10,7 +10,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
-using API.Hooks;
 using Carbon;
 using Carbon.Components;
 using UnityEngine;
@@ -39,7 +38,15 @@ namespace RustServerMetrics
             }
         }
 
-        readonly IReadOnlyDictionary<Message.Type, NetworkUpdateData> _networkUpdates = Enum.GetValues(typeof(Message.Type)).Cast<Message.Type>().Distinct().ToDictionary(x => x, z => new NetworkUpdateData(0, 0));
+        MetricsLogger()
+        {
+	        var dictionary = Enum.GetValues(typeof(Message.Type)).Cast<Message.Type>().Distinct() .ToDictionary(x => x, z => new NetworkUpdateData(0, 0));
+	        dictionary.Add((Message.Type)77, new NetworkUpdateData(0, 0));
+
+	        _networkUpdates = dictionary;
+        }
+
+        readonly IReadOnlyDictionary<Message.Type, NetworkUpdateData> _networkUpdates;
 
         public readonly MetricsTimeStorage<MethodInfo> ServerInvokes = new("invoke_execution", LogMethodInfo);
         public readonly MetricsTimeStorage<string> ServerRpcCalls = new("rpc_calls", LogMethodName);
@@ -99,7 +106,8 @@ namespace RustServerMetrics
                 if (nestedType.GetCustomAttribute<DelayedHarmonyPatchAttribute>(false) == null) continue;
 
                 var patchProcessor = new PatchClassProcessor(RustServerMetricsLoader.__harmonyInstance, nestedType);
-                Debug.Log(patchProcessor.Patch() == null ? $"[ServerMetrics]: Failed to apply patch: {nestedType.Name}" : $"[ServerMetrics]: Applied Startup Patch: {nestedType.Name}");
+                var patch = patchProcessor.Patch();
+                Debug.Log(patch == null ? $"[ServerMetrics]: Failed to apply patch: {nestedType.Name}" : $"[ServerMetrics]: Applied Startup Patch: {nestedType.Name} [{patch.Count:n0} methods]");
             }
         }
 
@@ -150,8 +158,6 @@ namespace RustServerMetrics
 		        {
 			        IEnumerable<MethodBase> results = method.Invoke(null, args.Array) as IEnumerable<MethodBase>;
 
-			        Logger.Log($"Lookup {type.Name}.{method.Name}: {results == null} {results?.Count()}");
-
 			        foreach (var patchedMethod in results)
 			        {
 				        var hook = Community.Runtime.HookManager.LoadedDynamicHooks.FirstOrDefault(x =>
@@ -159,7 +165,6 @@ namespace RustServerMetrics
 
 				        if (hook == null)
 				        {
-					        Logger.Log($" Not found: {patchedMethod.Name}");
 					        continue;
 				        }
 
@@ -439,7 +444,6 @@ namespace RustServerMetrics
             _reportUploader.AddToSendBuffer(_stringBuilder.ToString());
         }
 
-
         #region Helpers
 
         public void UploadPacket<T>(string ID, T data, Action<StringBuilder, T> serializer)
@@ -481,7 +485,6 @@ namespace RustServerMetrics
             }
         }
         #endregion
-
 
         #region Commands
 
@@ -571,7 +574,6 @@ namespace RustServerMetrics
         }
 
         #endregion
-
 
         #region Configuration
 

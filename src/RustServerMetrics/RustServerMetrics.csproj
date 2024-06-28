@@ -23,6 +23,7 @@
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)' == 'Linux'">
+		<AssemblyName>Carbon.Linux.RSM</AssemblyName>
 		<OutputPath>bin\Linux\</OutputPath>
 		<DefineConstants>TRACE</DefineConstants>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -33,6 +34,7 @@
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)' == 'Windows'">
+		<AssemblyName>Carbon.Windows.RSM</AssemblyName>
 		<OutputPath>bin\Windows\</OutputPath>
 		<DefineConstants>TRACE</DefineConstants>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>

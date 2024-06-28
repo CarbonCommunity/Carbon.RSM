@@ -18,7 +18,7 @@ namespace RustServerMetrics.HarmonyPatches
 
             retList.InsertRange(0, new CodeInstruction[]
             {
-                new CodeInstruction(OpCodes.Call, methodInfo)
+                new(OpCodes.Call, methodInfo)
             });
 
             return retList;
