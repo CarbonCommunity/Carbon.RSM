@@ -50,10 +50,11 @@
 			<ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" />
 		</ItemGroup>
 	</Target>
+	<ItemGroup>
+	  <PackageReference Include="Carbon.Community" Version="2.0.124" />
+	</ItemGroup>
 
 	<ItemGroup>
-		<Reference Include="Carbon.Common" />
-		<Reference Include="Carbon.SDK" />
 		<Reference Include="0Harmony" />
 		<Reference Include="Accessibility" />
 		<Reference Include="Assembly-CSharp" />
@@ -129,7 +130,6 @@
 		<Reference Include="UnityEngine.SubsystemsModule" />
 		<Reference Include="UnityEngine.TerrainModule" />
 		<Reference Include="UnityEngine.TerrainPhysicsModule" />
-		<Reference Include="UnityEngine.TextCoreModule" />
 		<Reference Include="UnityEngine.TextRenderingModule" />
 		<Reference Include="UnityEngine.TilemapModule" />
 		<Reference Include="UnityEngine.TLSModule" />
@@ -137,7 +137,6 @@
 		<Reference Include="UnityEngine.UIElementsModule" />
 		<Reference Include="UnityEngine.UIModule" />
 		<Reference Include="UnityEngine.UmbraModule" />
-		<Reference Include="UnityEngine.UNETModule" />
 		<Reference Include="UnityEngine.UnityAnalyticsModule" />
 		<Reference Include="UnityEngine.UnityConnectModule" />
 		<Reference Include="UnityEngine.UnityTestProtocolModule" />

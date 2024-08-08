@@ -24,7 +24,7 @@ namespace RustServerMetrics.HarmonyPatches.Delayed
 
             return true;
         }
-        
+
         [HarmonyTargetMethods]
         public static IEnumerable<MethodBase> TargetMethods(Harmony harmonyInstance)
         {
@@ -48,33 +48,33 @@ namespace RustServerMetrics.HarmonyPatches.Delayed
                     }
                 }
             }
-        } 
-        
+        }
+
         [HarmonyTranspiler]
         public static IEnumerable<CodeInstruction> Transpile(IEnumerable<CodeInstruction> originalInstructions, MethodBase methodBase, ILGenerator ilGenerator)
         {
             List<CodeInstruction> ret = originalInstructions.ToList();
             LocalBuilder local = ilGenerator.DeclareLocal(typeof(DateTime));
-            
+
             ret.InsertRange(0, new CodeInstruction []
-            { 
+            {
                 new (OpCodes.Call, AccessTools.Property(typeof(DateTime), nameof(DateTime.UtcNow)).GetMethod),
                 new (OpCodes.Stloc, local)
             });
 
             return Helpers.Postfix(
                 ret,
-                CustomPostfix, 
+                CustomPostfix,
                 new CodeInstruction(OpCodes.Ldstr, $"{methodBase.DeclaringType?.Name}.{methodBase.Name}"),
                 new CodeInstruction(OpCodes.Ldloc, local));
         }
-         
+
 
         public static void CustomPostfix(string methodName, DateTime __state)
         {
             if (MetricsLogger.Instance == null)
                 return;
-            
+
             var duration = DateTime.UtcNow - __state;
             MetricsLogger.Instance.ServerRpcCalls.LogTime(methodName, duration.TotalMilliseconds);
         }

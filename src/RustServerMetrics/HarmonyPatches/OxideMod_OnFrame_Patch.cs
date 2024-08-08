@@ -68,7 +68,7 @@ namespace RustServerMetrics.HarmonyPatches
             if (targetMethod == null)
                 return Array.Empty<MethodBase>();
 
-            return new MethodBase[] { targetMethod };
+            return [targetMethod];
         }
 
         [HarmonyPrefix]
@@ -82,6 +82,11 @@ namespace RustServerMetrics.HarmonyPatches
 	        }
 
 	        nextTick = time + 1f;
+
+	        if (!Community.IsServerInitialized)
+	        {
+		        return;
+	        }
 
 	        // Handle Plugins
 	        {

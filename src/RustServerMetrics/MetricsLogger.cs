@@ -98,8 +98,6 @@ namespace RustServerMetrics
 
             RustServerMetricsLoader.__harmonyInstance ??= new Harmony("RustServerMetrics" + "PATCH");
 
-            HandleCarbon(RustServerMetricsLoader.__harmonyInstance);
-
             var nestedTypes = assembly.GetTypes();
             foreach (var nestedType in nestedTypes)
             {
@@ -144,39 +142,6 @@ namespace RustServerMetrics
         }
 
         #endregion
-
-        internal void HandleCarbon(Harmony instance)
-        {
-	        var assembly = typeof(MetricsLogger).Assembly;
-	        var types = assembly.GetTypes();
-	        var count = 0;
-	        using var args = TempArray<object>.New([instance]);
-
-	        foreach (var type in types.Where(x => x.GetCustomAttribute<DelayedHarmonyPatchAttribute>() != null))
-	        {
-		        foreach (var method in type.GetMethods(BindingFlags.Static | BindingFlags.Public).Where(x => x.GetCustomAttribute<HarmonyTargetMethods>() != null))
-		        {
-			        IEnumerable<MethodBase> results = method.Invoke(null, args.Array) as IEnumerable<MethodBase>;
-
-			        foreach (var patchedMethod in results)
-			        {
-				        var hook = Community.Runtime.HookManager.LoadedDynamicHooks.FirstOrDefault(x =>
-					        (x.TargetMethods != null && x.TargetMethods.Count != 0 && x.TargetMethods[0] == patchedMethod));
-
-				        if (hook == null)
-				        {
-					        continue;
-				        }
-
-				        Community.Runtime.HookManager.Subscribe(hook.Identifier, "RSM.Static");
-				        count++;
-			        }
-		        }
-	        }
-
-	        Logger.Warn($"[RSM] Force patching {count:n0} static hooks");
-	        Community.Runtime.HookManager.ForceUpdateHooks();
-        }
 
         internal void OnPlayerInit(BasePlayer player)
         {
