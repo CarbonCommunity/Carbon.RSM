@@ -44,8 +44,8 @@ internal static class ServerMgr_Metrics_Patches
         yield return AccessTools.Method(typeof(BaseMountable), nameof(BaseMountable.FixedUpdateCycle));
         yield return AccessTools.Method(typeof(Buoyancy), nameof(Buoyancy.Cycle));
 
-        yield return AccessTools.Method(typeof(BaseEntity), nameof(BaseEntity.Kill));
-        yield return AccessTools.Method(typeof(BaseEntity), nameof(BaseEntity.Spawn));
+        yield return AccessTools.Method(typeof(BaseNetworkable), nameof(BaseNetworkable.Kill));
+        yield return AccessTools.Method(typeof(BaseNetworkable), nameof(BaseNetworkable.Spawn));
 
         yield return AccessTools.Method(typeof(Facepunch.Network.Raknet.Server), nameof(Facepunch.Network.Raknet.Server.Cycle));
     }
