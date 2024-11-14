@@ -1,15 +1,14 @@
 ﻿using HarmonyLib;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Reflection.Emit;
 using Carbon;
 using Carbon.Pooling;
+using Facepunch;
 
 namespace RustServerMetrics.HarmonyPatches
 {
-    [HarmonyPatch]
+	[HarmonyPatch]
     public static class OxideMod_OnFrame_Patch
     {
         const string OxideCore_AssemblyName = "Carbon.Common";
@@ -90,7 +89,7 @@ namespace RustServerMetrics.HarmonyPatches
 
 	        // Handle Plugins
 	        {
-		        var temp = PoolEx.GetDictionary<string, double>();
+		        var temp = Pool.Get<Dictionary<string, double>>();
 
 		        foreach (var plugin in Community.Runtime.Plugins.Plugins)
 		        {
@@ -99,12 +98,12 @@ namespace RustServerMetrics.HarmonyPatches
 
 		        MetricsLogger.Instance.OnOxidePluginMetrics(temp);
 
-		        PoolEx.FreeDictionary(ref temp);
+		        Pool.FreeUnmanaged(ref temp);
 	        }
 
 	        // Handle Modules
 	        {
-		        var temp = PoolEx.GetDictionary<string, double>();
+		        var temp = Pool.Get<Dictionary<string, double>>();
 
 		        foreach (var module in Community.Runtime.ModuleProcessor.Modules)
 		        {
@@ -113,7 +112,7 @@ namespace RustServerMetrics.HarmonyPatches
 
 		        MetricsLogger.Instance.OnCarbonModuleMetrics(temp);
 
-		        PoolEx.FreeDictionary(ref temp);
+		        Pool.FreeUnmanaged(ref temp);
 	        }
         }
     }

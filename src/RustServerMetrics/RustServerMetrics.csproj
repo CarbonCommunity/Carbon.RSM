@@ -51,7 +51,7 @@
 		</ItemGroup>
 	</Target>
 	<ItemGroup>
-	  <PackageReference Include="Carbon.Community" Version="2.0.124" />
+	  <PackageReference Include="Carbon.Community" Version="2.0.155" />
 	</ItemGroup>
 
 	<ItemGroup>
