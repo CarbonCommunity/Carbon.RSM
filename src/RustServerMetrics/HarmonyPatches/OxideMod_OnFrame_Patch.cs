@@ -93,7 +93,7 @@ namespace RustServerMetrics.HarmonyPatches
 
 		        foreach (var plugin in Community.Runtime.Plugins.Plugins)
 		        {
-			        temp.Add(plugin.Name, plugin.TotalHookTime.TotalMilliseconds);
+			        temp.Add(plugin.Name, plugin.TotalHookTime.TotalSeconds);
 		        }
 
 		        MetricsLogger.Instance.OnOxidePluginMetrics(temp);
@@ -107,7 +107,7 @@ namespace RustServerMetrics.HarmonyPatches
 
 		        foreach (var module in Community.Runtime.ModuleProcessor.Modules)
 		        {
-			        temp.Add(module.Name, module.TotalHookTime.TotalMilliseconds);
+			        temp.Add(module.Name, module.TotalHookTime.TotalSeconds);
 		        }
 
 		        MetricsLogger.Instance.OnCarbonModuleMetrics(temp);
