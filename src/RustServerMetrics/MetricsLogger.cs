@@ -68,6 +68,7 @@ namespace RustServerMetrics
         ReportUploader _reportUploader;
         Message.Type _lastMessageType;
         bool _firstReportGenerated;
+        System.Diagnostics.Process _currentProcess;
 
         public Uri BaseUri
         {
@@ -374,7 +375,7 @@ namespace RustServerMetrics
             _stringBuilder.Append("memory,server=");
             _stringBuilder.Append(Configuration.serverTag);
             _stringBuilder.Append(" used=");
-            _stringBuilder.Append(current.memoryUsageSystem);
+            _stringBuilder.Append(GetMemoryUsage(current));
             _stringBuilder.Append("i,collections=");
             _stringBuilder.Append(current.memoryCollections);
             _stringBuilder.Append("i,allocations=");
@@ -435,6 +436,18 @@ namespace RustServerMetrics
         }
 
         #region Helpers
+
+        long GetMemoryUsage(Performance.Tick performanceTick)
+        {
+            if (performanceTick.memoryUsageSystem > 0)
+                return performanceTick.memoryUsageSystem;
+
+            if (_currentProcess == null)
+                _currentProcess = System.Diagnostics.Process.GetCurrentProcess();
+
+            _currentProcess.Refresh();
+            return _currentProcess.WorkingSet64 / 1024 / 1024;
+        }
 
         public void UploadPacket<T>(string ID, T data, Action<StringBuilder, T> serializer)
         {
