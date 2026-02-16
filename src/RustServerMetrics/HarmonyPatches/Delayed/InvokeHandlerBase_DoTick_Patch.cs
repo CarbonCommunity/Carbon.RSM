@@ -46,7 +46,7 @@ namespace RustServerMetrics.HarmonyPatches.Delayed
         [HarmonyTargetMethods]
         public static IEnumerable<MethodBase> TargetMethods(Harmony harmonyInstance)
         {
-            yield return AccessTools.DeclaredMethod(typeof(InvokeHandlerBase<InvokeHandler>), nameof(InvokeHandlerBase<InvokeHandler>.DoTick));
+            yield return AccessTools.DeclaredMethod(typeof(InvokeHandlerBase<InvokeHandler>), "DoTick");
         }
 
         [HarmonyTranspiler]

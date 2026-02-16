@@ -110,7 +110,7 @@ namespace RustServerMetrics
             }
         }
 
-        public override void Awake()
+        protected override void Awake()
         {
             base.Awake();
             _reportUploader = gameObject.AddComponent<ReportUploader>();
