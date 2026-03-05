@@ -10,11 +10,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
-using Carbon;
-using Carbon.Components;
 using UnityEngine;
-using Harmony = HarmonyLib.Harmony;
-using Logger = Carbon.Logger;
 
 namespace RustServerMetrics
 {
@@ -38,15 +34,7 @@ namespace RustServerMetrics
             }
         }
 
-        MetricsLogger()
-        {
-	        var dictionary = Enum.GetValues(typeof(Message.Type)).Cast<Message.Type>().Distinct() .ToDictionary(x => x, z => new NetworkUpdateData(0, 0));
-	        dictionary.Add((Message.Type)77, new NetworkUpdateData(0, 0));
-
-	        _networkUpdates = dictionary;
-        }
-
-        readonly IReadOnlyDictionary<Message.Type, NetworkUpdateData> _networkUpdates;
+        readonly IReadOnlyDictionary<Message.Type, NetworkUpdateData> _networkUpdates = Enum.GetValues(typeof(Message.Type)).Cast<Message.Type>().Distinct().ToDictionary(x => x, z => new NetworkUpdateData(0, 0));
 
         public readonly MetricsTimeStorage<MethodInfo> ServerInvokes = new("invoke_execution", LogMethodInfo);
         public readonly MetricsTimeStorage<string> ServerRpcCalls = new("rpc_calls", LogMethodName);
@@ -93,20 +81,24 @@ namespace RustServerMetrics
         internal void OnServerStarted()
         {
             RustServerMetricsLoader.__serverStarted = true;
-
+            
             Debug.Log($"[ServerMetrics]: Applying Startup Patches");
             var assembly = GetType().Assembly;
 
-            RustServerMetricsLoader.__harmonyInstance ??= new Harmony("RustServerMetrics" + "PATCH");
+            var harmonyInstance = HarmonyLoader.loadedMods.FirstOrDefault(x => x.Assembly == assembly)?.Harmony.harmonyObject;
+            if (harmonyInstance == null)
+            {
+                RustServerMetricsLoader.__harmonyInstance ??= new Harmony("RustServerMetrics" + "PATCH");
+                harmonyInstance = RustServerMetricsLoader.__harmonyInstance;
+            }
 
             var nestedTypes = assembly.GetTypes();
             foreach (var nestedType in nestedTypes)
             {
                 if (nestedType.GetCustomAttribute<DelayedHarmonyPatchAttribute>(false) == null) continue;
-
-                var patchProcessor = new PatchClassProcessor(RustServerMetricsLoader.__harmonyInstance, nestedType);
-                var patch = patchProcessor.Patch();
-                Debug.Log(patch == null ? $"[ServerMetrics]: Failed to apply patch: {nestedType.Name}" : $"[ServerMetrics]: Applied Startup Patch: {nestedType.Name} [{patch.Count:n0} methods]");
+                
+                var patchProcessor = new PatchClassProcessor((Harmony)harmonyInstance, nestedType);
+                Debug.Log(patchProcessor.Patch() == null ? $"[ServerMetrics]: Failed to apply patch: {nestedType.Name}" : $"[ServerMetrics]: Applied Startup Patch: {nestedType.Name}");
             }
         }
 
@@ -143,6 +135,7 @@ namespace RustServerMetrics
         }
 
         #endregion
+
 
         internal void OnPlayerInit(BasePlayer player)
         {
@@ -197,19 +190,19 @@ namespace RustServerMetrics
 
         internal void OnOxidePluginMetrics(Dictionary<string, double> metrics)
         {
-	        if (!Ready) return;
-	        if (metrics.Count < 1) return;
+            if (!Ready) return;
+            if (metrics.Count < 1) return;
 
-	        foreach (var metric in metrics)
-	        {
-		        UploadPacket("oxide_plugins", metric, (builder, report) =>
-		        {
-			        builder.Append(",plugin=\"");
-			        builder.Append(PLUGIN_NAME_REGEX.Replace(report.Key, string.Empty));
-			        builder.Append("\" hookTime=");
-			        builder.Append(report.Value);
-		        });
-	        }
+            foreach (var metric in metrics)
+            {
+                UploadPacket("oxide_plugins", metric, (builder, report) =>
+                {
+                    builder.Append(",plugin=\"");
+                    builder.Append(PLUGIN_NAME_REGEX.Replace(report.Key, string.Empty));
+                    builder.Append("\" hookTime=");
+                    builder.Append(report.Value);
+                });
+            }
         }
 
         internal void OnCarbonModuleMetrics(Dictionary<string, double> metrics)
@@ -489,6 +482,7 @@ namespace RustServerMetrics
         }
         #endregion
 
+
         #region Commands
 
         void RegisterCommands()
@@ -577,6 +571,7 @@ namespace RustServerMetrics
         }
 
         #endregion
+
 
         #region Configuration
 

@@ -26,9 +26,9 @@ namespace RustServerMetrics.HarmonyPatches
 
             retList.InsertRange(idx, new CodeInstruction[]
             {
-                new(OpCodes.Ldsfld, fieldInfo),
-                new(OpCodes.Ldarg_0),
-                new(OpCodes.Call, methodInfo)
+                new CodeInstruction(OpCodes.Ldsfld, fieldInfo),
+                new CodeInstruction(OpCodes.Ldarg_0),
+                new CodeInstruction(OpCodes.Call, methodInfo)
             });
 
             return retList;

@@ -78,6 +78,7 @@
 		<Reference Include="Rust.Data" />
 		<Reference Include="Rust.Demo" />
 		<Reference Include="Rust.Global" />
+		<Reference Include="Rust.Harmony" />
 		<Reference Include="Rust.Localization" />
 		<Reference Include="Rust.Platform" />
 		<Reference Include="Rust.Platform.Common" />
@@ -130,6 +131,7 @@
 		<Reference Include="UnityEngine.SubsystemsModule" />
 		<Reference Include="UnityEngine.TerrainModule" />
 		<Reference Include="UnityEngine.TerrainPhysicsModule" />
+		<Reference Include="UnityEngine.TextCoreModule" />
 		<Reference Include="UnityEngine.TextRenderingModule" />
 		<Reference Include="UnityEngine.TilemapModule" />
 		<Reference Include="UnityEngine.TLSModule" />
@@ -137,6 +139,7 @@
 		<Reference Include="UnityEngine.UIElementsModule" />
 		<Reference Include="UnityEngine.UIModule" />
 		<Reference Include="UnityEngine.UmbraModule" />
+		<Reference Include="UnityEngine.UNETModule" />
 		<Reference Include="UnityEngine.UnityAnalyticsModule" />
 		<Reference Include="UnityEngine.UnityConnectModule" />
 		<Reference Include="UnityEngine.UnityTestProtocolModule" />

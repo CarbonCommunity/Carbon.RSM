@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Carbon;
-using Carbon.Pooling;
 using Facepunch;
 
 namespace RustServerMetrics.HarmonyPatches
