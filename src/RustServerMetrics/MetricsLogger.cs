@@ -1,14 +1,15 @@
-﻿using HarmonyLib;
-using Network;
-using Newtonsoft.Json;
-using RustServerMetrics.Config;
-using RustServerMetrics.HarmonyPatches.Utility;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
+using HarmonyLib;
+using Network;
+using Newtonsoft.Json;
+using RustServerMetrics.Config;
+using RustServerMetrics.HarmonyPatches.Utility;
 using UnityEngine;
 
 namespace RustServerMetrics;
@@ -16,7 +17,8 @@ namespace RustServerMetrics;
 public class MetricsLogger : SingletonComponent<MetricsLogger>
 {
     private const string ConfigurationPath = "HarmonyMods_Data/ServerMetrics/Configuration.json";
-    private readonly StringBuilder _stringBuilder = new();
+	private readonly static Regex PLUGIN_NAME_REGEX = new Regex(@"_|[^\w\d]");
+	private readonly StringBuilder _stringBuilder = new();
     private readonly Dictionary<ulong, Action> _playerStatsActions = new();
     private readonly Dictionary<ulong, uint> _perfReportDelayCounter = new();
 
@@ -220,7 +222,24 @@ public class MetricsLogger : SingletonComponent<MetricsLogger>
         }
     }
 
-    internal bool OnClientPerformanceReport(ClientPerformanceReport clientPerformanceReport)
+	internal void OnCarbonModuleMetrics(Dictionary<string, double> metrics)
+	{
+		if (!Ready) return;
+		if (metrics.Count < 1) return;
+
+		foreach (var metric in metrics)
+		{
+			UploadPacket("carbon_modules", metric, (builder, report) =>
+			{
+				builder.Append(",module=\"");
+				builder.Append(PLUGIN_NAME_REGEX.Replace(report.Key, string.Empty));
+				builder.Append("\" hookTime=");
+				builder.Append(report.Value);
+			});
+		}
+	}
+
+	internal bool OnClientPerformanceReport(ClientPerformanceReport clientPerformanceReport)
     {
         if (clientPerformanceReport.request_id != _performanceReportRequestId) return false;
 
