@@ -1,5 +1,5 @@
-# Rust Server Metrics
-A metrics gathering HarmonyMod for [Rust](https://playrust.com) game servers.
+# Rust Server Metrics (for Carbon)
+A metrics gathering Harmony-based module for [Rust](https://playrust.com) game servers using Carbon.
 
 ![grafana-preview](.github/readme-image.png)
 
