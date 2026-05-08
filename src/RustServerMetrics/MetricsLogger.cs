@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using HarmonyLib;
 using Network;
 using Newtonsoft.Json;
+using ProtoBuf;
 using RustServerMetrics.Config;
 using RustServerMetrics.HarmonyPatches.Utility;
 using UnityEngine;
@@ -239,7 +240,7 @@ public class MetricsLogger : SingletonComponent<MetricsLogger>
 		}
 	}
 
-	internal bool OnClientPerformanceReport(ClientPerformanceReport clientPerformanceReport)
+	internal bool OnClientPerformanceReport(PerformanceReport clientPerformanceReport)
     {
         if (clientPerformanceReport.request_id != _performanceReportRequestId) return false;
 
