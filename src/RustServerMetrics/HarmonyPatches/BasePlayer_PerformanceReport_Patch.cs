@@ -21,7 +21,6 @@ public class BasePlayer_PerformanceReport_Patch
 		using PerformanceReport report = msg.read.Proto<PerformanceReport>();
 		if (report.user_id != __instance.UserIDString)
 		{
-			DebugEx.Log($"Client performance report from {__instance} has incorrect user_id ({__instance.UserIDString})");
 			return;
 		}
 		MetricsLogger.Instance.OnClientPerformanceReport(report);
