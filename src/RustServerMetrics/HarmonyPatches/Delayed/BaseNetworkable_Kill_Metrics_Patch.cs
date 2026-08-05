@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using HarmonyLib;
+using RustServerMetrics.HarmonyPatches.Utility;
 using UnityEngine;
 using Stopwatch = System.Diagnostics.Stopwatch;
 

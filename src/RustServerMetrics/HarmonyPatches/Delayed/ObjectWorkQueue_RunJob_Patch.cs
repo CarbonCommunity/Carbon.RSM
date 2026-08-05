@@ -16,70 +16,76 @@ namespace RustServerMetrics.HarmonyPatches.Delayed;
 [HarmonyPatch]
 internal static class ObjectWorkQueue_RunJob_Patch
 {
-    private static readonly double TicksToMs = 1000.0 / Stopwatch.Frequency;
+	private static readonly double TicksToMs = 1000.0 / Stopwatch.Frequency;
 
-    [HarmonyPrepare]
-    public static bool Prepare()
-    {
-        if (!RustServerMetricsLoader.__serverStarted)
-        {
-            Debug.Log("Note: Cannot patch ObjectWorkQueue_RunJob_Patch yet. We will patch it upon server start.");
-            return false;
-        }
+	[HarmonyPrepare]
+	public static bool Prepare()
+	{
+		if (!RustServerMetricsLoader.__serverStarted)
+		{
+			Debug.Log("Note: Cannot patch ObjectWorkQueue_RunJob_Patch yet. We will patch it upon server start.");
+			return false;
+		}
 
-        return true;
-    }
+		return true;
+	}
 
-    [HarmonyTargetMethods]
-    public static IEnumerable<MethodBase> TargetMethods(Harmony harmonyInstance)
-    {
-        var assemblyCSharp = typeof(BaseNetworkable).Assembly;
-        var typesToScan = new Stack<Type>(assemblyCSharp.GetTypes());
-        HashSet<string> yielded = [];
+	[HarmonyTargetMethods]
+	public static IEnumerable<MethodBase> TargetMethods()
+	{
+		var assemblyCSharp = typeof(BaseNetworkable).Assembly;
+		var typesToScan = new Stack<Type>(assemblyCSharp.GetTypes());
+		HashSet<string> yielded = [];
 
-        while (typesToScan.TryPop(out var type))
-        {
-            var subTypes = type.GetNestedTypes();
-            foreach (var t in subTypes)
-                typesToScan.Push(t);
+		while (typesToScan.TryPop(out var type))
+		{
+			foreach (var t in type.GetNestedTypes())
+			{
+				typesToScan.Push(t);
+			}
 
-            if (type.BaseType == null || !type.BaseType.Name.Contains("ObjectWorkQueue"))
-                continue;
+			if (type.BaseType == null || !type.BaseType.Name.Contains(nameof(ObjectWorkQueue)))
+			{
+				continue;
+			}
 
-            if (yielded.Add(type.FullName))
-            {
-                yield return AccessTools.Method(type, "RunJob");
-            }
-        }
-    }
+			var method = AccessTools.Method(type, nameof(ObjectWorkQueue<>.RunJob));
+			if (method != null && yielded.Add(type.FullName))
+			{
+				yield return method;
+			}
+		}
+	}
 
-    [HarmonyTranspiler]
-    public static IEnumerable<CodeInstruction> Transpile(IEnumerable<CodeInstruction> originalInstructions,
-                                                         MethodBase methodBase,
-                                                         ILGenerator ilGenerator)
-    {
-        var ret = originalInstructions.ToList();
-        var local = ilGenerator.DeclareLocal(typeof(long));
+	[HarmonyTranspiler]
+	public static IEnumerable<CodeInstruction> Transpile(
+		IEnumerable<CodeInstruction> originalInstructions,
+		MethodBase methodBase,
+		ILGenerator ilGenerator)
+	{
+		var ret = originalInstructions.ToList();
+		var local = ilGenerator.DeclareLocal(typeof(long));
 
-        ret.InsertRange(0, [
-            new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Stopwatch), nameof(Stopwatch.GetTimestamp))),
-            new CodeInstruction(OpCodes.Stloc, local)
-        ]);
+		ret.InsertRange(0, [
+			new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Stopwatch), nameof(Stopwatch.GetTimestamp))),
+			new CodeInstruction(OpCodes.Stloc, local)
+		]);
 
-        return Helpers.Postfix(ret,
-                               CustomPostfix,
-                               new CodeInstruction(OpCodes.Ldstr, $"{methodBase.DeclaringType?.Name}.{methodBase.Name}"),
-                               new CodeInstruction(OpCodes.Ldloc, local));
-    }
+		return Helpers.Postfix(
+			ret,
+			CustomPostfix,
+			new CodeInstruction(OpCodes.Ldstr, $"{methodBase.DeclaringType?.Name}.{methodBase.Name}"),
+			new CodeInstruction(OpCodes.Ldloc, local));
+	}
 
-    private static void CustomPostfix(string methodName, long __state)
-    {
-        if (!MetricsLogger.IsReady)
-        {
-            return;
-        }
+	private static void CustomPostfix(string methodName, long __state)
+	{
+		if (!MetricsLogger.IsReady)
+		{
+			return;
+		}
 
-        var ms = (Stopwatch.GetTimestamp() - __state) * TicksToMs;
-        MetricsLogger.Instance.WorkQueueTimes.LogTime(methodName, ms);
-    }
+		var ms = (Stopwatch.GetTimestamp() - __state) * TicksToMs;
+		MetricsLogger.Instance.WorkQueueTimes.LogTime(methodName, ms);
+	}
 }
