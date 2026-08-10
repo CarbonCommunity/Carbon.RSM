@@ -550,8 +550,11 @@ public class MetricsLogger : SingletonComponent<MetricsLogger>
 			Call = StatusCommand
 		};
 
-		ConsoleSystem.Index.Server.Dict[commandPrefix + "." + "reloadcfg"] = reloadCfgCommand;
-		ConsoleSystem.Index.Server.Dict[commandPrefix + "." + "status"] = statusCommand;
+		var reloadCfgCommandName = (Facepunch.StringView)(commandPrefix + "." + "reloadcfg");
+		var statusCommandName = (Facepunch.StringView)(commandPrefix + "." + "status");
+
+		ConsoleSystem.Index.Server.Dict[reloadCfgCommandName] = reloadCfgCommand;
+		ConsoleSystem.Index.Server.Dict[statusCommandName] = statusCommand;
 
 		// Would be nice if this had a public setter, or better yet, a register command helper
 		// update: now it does
